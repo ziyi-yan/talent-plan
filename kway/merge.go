@@ -13,6 +13,11 @@ func Sort(data []int64) {
 		n = runtime.NumCPU()
 	)
 
+	if len(data) < 10*n {
+		sort.Sort(Int64Slice(data))
+		return
+	}
+
 	var wg sync.WaitGroup
 	wg.Add(n)
 
