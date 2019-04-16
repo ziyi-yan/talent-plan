@@ -10,8 +10,7 @@ import (
 // Sort sorts the array with multiple goroutines using K-way Merge Sort algorithm.
 func Sort(data []int64) {
 	var (
-		n    = runtime.NumCPU()
-		size = len(data) / n
+		n = runtime.NumCPU()
 	)
 
 	var wg sync.WaitGroup
@@ -19,13 +18,12 @@ func Sort(data []int64) {
 
 	segs := split(data, n)
 
-	curr := data
 	for _, seg := range segs {
+		seg := seg
 		go func() {
 			sort.Sort(Int64Slice(seg))
 			wg.Done()
 		}()
-		curr = curr[size:]
 	}
 
 	wg.Wait()
@@ -37,10 +35,11 @@ func Sort(data []int64) {
 func split(data []int64, n int) (segs [][]int64) {
 	curr := data
 	size := len(data) / n
-	for i := 0; i < n; i++ {
+	for i := 0; i < n-1; i++ {
 		segs = append(segs, curr[:size])
 		curr = curr[size:]
 	}
+	segs = append(segs, curr) // add remain elements to the last segment
 	return
 }
 
@@ -122,7 +121,7 @@ func (tm *Tournament) Winner() (int64, int) {
 }
 
 func (tm *Tournament) setElement(arrIndex int, element int64) {
-	tm.tree[tm.toTreeIndex(arrIndex)]= Node{element, arrIndex}
+	tm.tree[tm.toTreeIndex(arrIndex)] = Node{element, arrIndex}
 }
 
 func (tm *Tournament) toTreeIndex(idx int) int {
