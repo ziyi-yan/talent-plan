@@ -1,0 +1,10 @@
+BenchmarkMergeSort-4                   1        2530741617 ns/op        134220000 B/op        18 allocs/op
+BenchmarkMergeSort-4                   1        2345185323 ns/op        134220160 B/op        18 allocs/op
+BenchmarkMergeSort-4                   1        2529570535 ns/op        134219808 B/op        16 allocs/op
+BenchmarkMergeSort-4                   1        2413781782 ns/op        134219136 B/op        15 allocs/op
+BenchmarkMergeSort-4                   1        2422713746 ns/op        134219904 B/op        17 allocs/op
+BenchmarkNormalSort-4                  1        4403359058 ns/op              64 B/op          2 allocs/op
+BenchmarkNormalSort-4                  1        5036449452 ns/op              64 B/op          2 allocs/op
+BenchmarkNormalSort-4                  1        5082034165 ns/op              64 B/op          2 allocs/op
+BenchmarkNormalSort-4                  1        4593600822 ns/op              64 B/op          2 allocs/op
+BenchmarkNormalSort-4                  1        5366908916 ns/op              64 B/op          2 allocs/op
