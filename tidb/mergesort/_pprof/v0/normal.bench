@@ -1,0 +1,7 @@
+goos: darwin
+goarch: amd64
+pkg: pingcap/talentplan/tidb/mergesort
+BenchmarkMergeSort-4                  1        4571118431 ns/op              64 B/op          2 allocs/op
+BenchmarkMergeSort-4                  1        4886610935 ns/op              64 B/op          2 allocs/op
+BenchmarkMergeSort-4                  1        4137878964 ns/op              64 B/op          2 allocs/op
+BenchmarkMergeSort-4                  1        4196225261 ns/op              64 B/op          2 allocs/op
