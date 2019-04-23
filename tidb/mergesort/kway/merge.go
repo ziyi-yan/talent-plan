@@ -76,107 +76,13 @@ func Merge(arrs ...[]int64) []int64 {
 
 		if nextElement, arr := idxArr[winnerIdx]+1, arrs[winnerIdx]; nextElement < len(arr) {
 			tournamentTree.Replace(winnerIdx, arr[nextElement])
-			idxArr[winnerIdx] = nextElement
+			idxArr[winnerIdx]++
 		} else {
 			tournamentTree.Replace(winnerIdx, math.MaxInt64)
 		}
 	}
 
 	return resultArr
-}
-
-type Tournament struct {
-	tree []Node
-	size int
-	arrs [][]int64
-}
-
-type Node struct {
-	element  int64
-	ArrIndex int
-}
-
-func NewTournament(arrs [][]int64) *Tournament {
-	n := len(arrs)
-	size := 1
-	nextLine := 2
-	for ; nextLine < n; nextLine *= 2 {
-		size += nextLine
-	}
-	remain := n - nextLine/2
-	size += 2 * remain
-
-	tm := &Tournament{
-		tree: make([]Node, size+1),
-		size: size,
-		arrs: arrs,
-	}
-	tm.initialBattle(arrs)
-	return tm
-}
-
-func (tm *Tournament) Replace(arrIndex int, element int64) {
-	tm.setElement(arrIndex, element)
-	tm.promote(tm.toTreeIndex(arrIndex), Node{element, arrIndex})
-}
-
-func (tm *Tournament) Winner() (int64, int) {
-	winner := tm.tree[0]
-	return winner.element, winner.ArrIndex
-}
-
-func (tm *Tournament) setElement(arrIndex int, element int64) {
-	tm.tree[tm.toTreeIndex(arrIndex)] = Node{element, arrIndex}
-}
-
-func (tm *Tournament) toTreeIndex(idx int) int {
-	return tm.size - idx
-}
-
-func (tm *Tournament) initialBattle(arrs [][]int64) {
-	for i := 0; i < len(arrs); i++ {
-		tm.setElement(i, arrs[i][0])
-	}
-	root := 1
-	winner := tm.build(root)
-	tm.tree[0] = winner
-}
-
-func (tm *Tournament) build(index int) Node {
-	if tm.isLeaf(index) {
-		return tm.tree[index]
-	}
-	leftWinner := tm.build(index * 2)
-	rightWinner := tm.build(index*2 + 1)
-	winner, loser := play(leftWinner, rightWinner)
-	tm.tree[index] = loser
-	return winner
-}
-
-func (tm *Tournament) isLeaf(index int) bool {
-	return len(tm.tree)-len(tm.arrs) <= index && index < len(tm.tree)
-}
-
-func (tm *Tournament) promote(index int, node Node) {
-	curr := index / 2
-	promotingNode := node
-	for curr > 0 {
-		if promotingNode.element > tm.tree[curr].element {
-			loser := promotingNode
-			promotingNode = tm.tree[curr]
-			tm.tree[curr] = loser
-		}
-		curr = curr / 2
-	}
-	tm.tree[0] = promotingNode
-}
-
-func play(leftWinner Node, rightWinner Node) (Node, Node) {
-	if leftWinner.element < rightWinner.element {
-		return leftWinner, rightWinner
-	} else {
-		return rightWinner, leftWinner
-	}
 }
 
 // Int64Slice attaches the methods of Interface to []int64, sorting in increasing order.
