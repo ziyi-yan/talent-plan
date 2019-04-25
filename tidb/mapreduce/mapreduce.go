@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"encoding/json"
+	"fmt"
 	"hash/fnv"
 	"io/ioutil"
 	"log"
@@ -88,7 +89,7 @@ func (c *MRCluster) worker() {
 			if t.phase == mapPhase {
 				content, err := ioutil.ReadFile(t.mapFile)
 				if err != nil {
-					panic(err)
+					panic(fmt.Sprintf("cannot open input file %q: %v", t.mapFile, err))
 				}
 
 				fs := make([]*os.File, t.nReduce)
@@ -109,7 +110,30 @@ func (c *MRCluster) worker() {
 				}
 			} else {
 				// YOUR CODE HERE :)
-				panic("YOUR CODE HERE")
+				keyvalues := make(map[string][]string)
+				for i := 0; i < t.nMap; i++ {
+					rpath := reduceName(t.dataDir, t.jobName, i, t.taskNumber)
+					f, buf := OpenFileAndBuf(rpath)
+					dec := json.NewDecoder(buf)
+					var kv KeyValue
+					for {
+						if err := dec.Decode(&kv); err != nil {
+							break
+						}
+						keyvalues[kv.Key] = append(keyvalues[kv.Key], kv.Value)
+					}
+					f.Close()
+				}
+
+				outFile := mergeName(t.dataDir, t.jobName, t.taskNumber)
+				out, err := os.Create(outFile)
+				if err != nil {
+					log.Fatalf("cannot create output file %s: %v", outFile, err)
+				}
+				for k, vs := range keyvalues {
+					fmt.Fprint(out, t.reduceF(k, vs))
+				}
+				out.Close()
 			}
 			t.wg.Done()
 		case <-c.exit:
@@ -156,7 +180,28 @@ func (c *MRCluster) run(jobName, dataDir string, mapF MapF, reduceF ReduceF, map
 
 	// reduce phase
 	// YOUR CODE HERE :D
-	panic("YOUR CODE HERE")
+	results := make([]string, 0, nReduce)
+	reduceTasks := make([]*task, 0, nReduce)
+	for i := 0; i < nReduce; i++ {
+		t := &task{
+			dataDir:    dataDir,
+			jobName:    jobName,
+			mapFile:    "",
+			phase:      reducePhase,
+			taskNumber: i,
+			nReduce:    nReduce,
+			nMap:       nMap,
+			reduceF:    reduceF,
+		}
+		t.wg.Add(1)
+		reduceTasks = append(reduceTasks, t)
+		go func() { c.taskCh <- t }()
+	}
+	for i, t := range reduceTasks {
+		t.wg.Wait()
+		results = append(results, mergeName(dataDir, jobName, i))
+	}
+	notify <- results
 }
 
 func ihash(s string) int {
